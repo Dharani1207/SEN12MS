@@ -21,11 +21,11 @@ def load_s2(path, imgTransform, s2_band):
     bands_selected = s2_band
     with rasterio.open(path) as data:
         s2 = data.read(bands_selected)
-    s2 = s2.astype(np.float32)
+    s2 = s2.astype(np.float32)  # convert to float using astype
     if not imgTransform:
-        s2 = np.clip(s2, 0, 10000)
-        s2 /= 10000
-    s2 = s2.astype(np.float32)
+        s2 = np.clip(s2, 0, 10000) # Limit values within 0 ti 10000
+        s2 /= 10000 # normalize between 0 and 1
+    s2 = s2.astype(np.float32) # convert the normalized value to float
     return s2
 
 
@@ -114,8 +114,8 @@ class SEN12MS(data.Dataset):
     # https://github.com/MSchmitt1984/SEN12MS/
 
     def __init__(self, path, ls_dir=None, imgTransform=None, 
-                 label_type="multi_label", threshold=0.1, subset="train",
-                 use_s2=False, use_s1=False, use_RGB=False, IGBP_s=True):
+                 label_type="multi_label", threshold=0.1, subset="val",
+                 use_s2=True, use_s1=False, use_RGB=True, IGBP_s=True):
         """Initialize the dataset"""
 
         # inizialize
@@ -125,6 +125,7 @@ class SEN12MS(data.Dataset):
         self.label_type = label_type
 
         # make sure input parameters are okay
+        
         if not (use_s2 or use_s1 or use_RGB):
             raise ValueError("No input specified, set at least one of "
                              + "use_[s2, s1, RGB] to True!")
@@ -230,7 +231,7 @@ class SEN12MS(data.Dataset):
                 # 1 broken file "ROIs1868_summer_s2_146_p202" had been removed 
                 # from the list already
             if subset == "val":
-                pbar = tqdm(total=18550)   # 18550 samples in val set
+                pbar = tqdm(total=784)   # 18550 samples in val set
             if subset == "test":
                 pbar = tqdm(total=18106)   # 18106 samples in test set
             pbar.set_description("[Load]")
@@ -262,7 +263,7 @@ class SEN12MS(data.Dataset):
                 s1_loc = s2_loc.replace("_s2_", "_s1_").replace("s2_", "s1_")
                 
                 pbar.update()
-                self.samples.append({"s1": s1_loc, "s2": s2_loc, 
+                self.samples.append({"s1": s1_loc, "s2": s2_loc, # Samples is probably a list of objects.
                                      "id": s2_id})
        
             pbar.close()
@@ -369,8 +370,8 @@ if __name__ == "__main__":
                             1082.4341, 1057.7628, 1136.1942, 1132.7898, 991.48016]} 
     
     # data path
-    data_dir = "/work/share/sen12ms"    # SEN12MS dir
-    list_dir = "/home/labels_splits/"    # split lists/ label dirs
+    data_dir = "SEN12MS\data"               # SEN12MS dir
+    list_dir = "SEN12MS\label_split_dir"    # split lists/ label dirs
   
     # define image transform
     imgTransform=transforms.Compose([ToTensor(),Normalize(bands_mean, bands_std)])
@@ -378,17 +379,12 @@ if __name__ == "__main__":
     # test multi_label part with normalization
     print("\n\nSEN12MS train")
     ds = SEN12MS(data_dir, list_dir, imgTransform, 
-                 label_type="multi_label", threshold=0.1, subset="train", 
-                 use_s1=False, use_s2=False, use_RGB=True, IGBP_s=True)
+                 label_type="multi_label", threshold=0.1, subset="val", 
+                 use_s1=True, use_s2=True, use_RGB=True, IGBP_s=True)
     s_nor = ds.__getitem__(100)
     print("id:", s_nor["id"], "\n",
           "input shape:", s_nor["image"].shape, "\n",
           "number of classes", ds.n_classes)
     
-
-
-
-
-
 
 

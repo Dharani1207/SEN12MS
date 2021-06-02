@@ -44,17 +44,17 @@ parser.add_argument('--exp_name', type=str, default=None,
                          path would be set to model name.")
 
 # data directory
-parser.add_argument('--data_dir', type=str, default=None,
+parser.add_argument('--data_dir', type=str, default="SEN12MS\data",
                     help='path to SEN12MS dataset')
-parser.add_argument('--label_split_dir', type=str, default=None,
+parser.add_argument('--label_split_dir', type=str, default="SEN12MS\label_split_dir",
                     help="path to label data and split list")
 
 # input/output
-parser.add_argument('--use_s2', action='store_true', default=False,
+parser.add_argument('--use_s2', action='store_true', default=True,
                     help='use sentinel-2 bands')
 parser.add_argument('--use_s1', action='store_true', default=False,
                     help='use sentinel-1 data')
-parser.add_argument('--use_RGB', action='store_true', default=False,
+parser.add_argument('--use_RGB', action='store_true', default=True,
                     help='use sentinel-2 RGB bands')
 parser.add_argument('--IGBP_simple', action='store_true', default=True,
                     help='use IGBP simplified scheme; otherwise: IGBP original scheme')
