@@ -31,13 +31,13 @@ class SEN12MS(data.Dataset):
         self.labels = pkl.load(label_file)
         label_file.close()
         
-        
+        #Loading the samples
         samples_file_path = "SEN12MS\\label_split_dir\\val_list.pkl"
         sample_file = open(samples_file_path, "rb")
         self.samples =  pkl.load(sample_file)
         sample_file.close()
 
-        #Fixing the right in depth path for all files 
+        #Fixing the right in-depth path for all files 
         self.sampleObject = []    
         for s2_id in self.samples:
             mini_name = s2_id.split("_")
@@ -45,12 +45,16 @@ class SEN12MS(data.Dataset):
             s1_loc = s2_loc.replace("_s2_", "_s1_").replace("s2_", "s1_")
             self.sampleObject.append({"s1": s1_loc, "s2": s2_loc, "id": s2_id})
        
-    def __getitem__(self, index):
+    def __getitem__(self, index,use_all):
         #Bands to read with
         S2_BANDS_LD = [2, 3, 4, 5, 6, 7, 8, 9, 12, 13]
         S2_BANDS_RGB = [2, 3, 4] # B(2),G(3),R(4)
+        S2_BANDS_ALL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
         with rasterio.open(self.sampleObject[index]['s2']) as data:
-            img = data.read(S2_BANDS_LD)
+            if use_all:
+                img = data.read(S2_BANDS_ALL)
+            else:
+                img = data.read(S2_BANDS_LD)
         img = img.astype(np.float32)
 
         # load label
@@ -78,21 +82,23 @@ def main():
 
     #Data Generation to pass to Dataloader
     #imgTransform = transforms.Compose([ToTensor(),Normalize(bands_mean, bands_std)]) # No idea what this does
-    lengthArray = np.arange(0,784,1)
-    band2 = np.zeros((256,256))
-    for i in lengthArray:  
-        train_dataGen = SEN12MS().__getitem__(index=i)
-        band2 = band2 + train_dataGen['image'][0] #Band 2
-    temp = band2/784
-    band2mean = np.mean(temp)
-    print(band2mean)   
-        # #Starting with DataLoader
-        # train_data_loader = data.DataLoader(train_dataGen, 
-        #                            batch_size=64, 
-        #                            num_workers=0, 
-        #                            shuffle=True, 
-        #                            pin_memory=True)
-        # print('Completed')
+    lengthArray = np.arange(0,SEN12MS().__len__(),1)
+    bandArray = np.arange(0,13,1)
+    for i in bandArray:  
+        singleBandTotalForAllImages = np.zeros((256,256))
+        for j in lengthArray:
+            train_dataGen = SEN12MS().__getitem__(index = j,use_all = True)
+            singleBandTotalForAllImages = singleBandTotalForAllImages + train_dataGen['image'][i]
+        temp = singleBandTotalForAllImages/SEN12MS().__len__()
+        bandmean = np.mean(temp)
+        print(bandmean)   
+        #Starting with DataLoader
+        train_data_loader = data.DataLoader(train_dataGen, 
+                                   batch_size=64, 
+                                   num_workers=0, 
+                                   shuffle=True, 
+                                   pin_memory=True)
+        print('Completed')
 
 
 if __name__ == "__main__":
