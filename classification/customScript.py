@@ -31,13 +31,13 @@ class SEN12MS(data.Dataset):
             self.n_classes = 17 
         
         #Loading the labels
-        label_file_path = "SEN12MS\\label_split_dir\\IGBP_probability_labels.pkl" #Local : "SEN12MS\\label_split_dir\\IGBP_probability_labels.pkl" os.path.join(list_dir,"IGBP_probability_labels.pkl")
+        label_file_path = os.path.join(list_dir,"IGBP_probability_labels.pkl") #Local : "SEN12MS\\label_split_dir\\IGBP_probability_labels.pkl" os.path.join(list_dir,"IGBP_probability_labels.pkl")
         label_file = open(label_file_path, "rb")
         self.labels = pkl.load(label_file)
         label_file.close()
         
         #Loading the samples
-        samples_file_path = "SEN12MS\\label_split_dir\\train_list.pkl" #Local : "SEN12MS\\label_split_dir\\val_list.pkl" os.path.join(list_dir,"val_list.pkl")
+        samples_file_path = os.path.join(list_dir,"val_list.pkl") #Local : "SEN12MS\\label_split_dir\\val_list.pkl" os.path.join(list_dir,"val_list.pkl")
         sample_file = open(samples_file_path, "rb")
         self.samples =  pkl.load(sample_file)
         sample_file.close()
