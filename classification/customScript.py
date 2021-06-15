@@ -7,7 +7,7 @@ import rasterio
 
 #SEN12MS Class - Data Generating class
 class SEN12MS(data.Dataset):
-    def __init__(self,cloudy_dataset = False, localComputer = True):
+    def __init__(self,cloudy_dataset = False, localComputer = False):
         
        # data path
         if localComputer:
